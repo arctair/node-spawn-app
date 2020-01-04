@@ -6,7 +6,7 @@
   "scripts": {
     "build": "mkdir -p build ; babel src/index.js > build/index.js",
     "package": "mkdir -p package ; tar czvf package/spawn-app.tgz build/index.js package.json --transform 's/^/package\\//'",
-    "deploy": "aws s3 cp package/spawn-app.tgz s3://npm.arctair.com/"
+    "deploy": "aws s3 cp package/spawn-app.tgz s3://npm.arctair.com/spawn-app-1.0.0.tgz"
   },
   "dependencies": {
     "@babel/cli": "^7.7.7",
