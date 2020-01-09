@@ -1,5 +1,5 @@
 import childProcess from 'child_process';
-import net from 'net';
+import portInUse from './portInUse';
 
 const spawnApp = ({ env = process.env, port, path }) => new Promise((resolve, reject) => {
   const _process = childProcess.spawn(
@@ -18,17 +18,12 @@ const spawnApp = ({ env = process.env, port, path }) => new Promise((resolve, re
     1000,
   );
   const interval = setInterval(
-    () => {
-      const portCheck = net.createServer()
-      .once('error', error => {
-        if (error.code == 'EADDRINUSE') {
-          clearInterval(interval);
-          clearTimeout(timeout);
-          resolve(_process);
-        }
-      })
-      .once('listening', () => portCheck.close())
-      .listen(port);
+    async () => {
+      if (await portInUse(port)) {
+        clearInterval(interval);
+        clearTimeout(timeout);
+        resolve(_process);
+      }
     },
     10,
   );
