@@ -6,7 +6,7 @@ const spawnPg = ({ user }) => portInUse(5432)
 .then(portIsInUse => {
   if (portIsInUse) throw Error('Port 5432 already in use');
 })
-.then(() => new Promise(async (resolve, reject) => {
+.then(() => new Promise((resolve, reject) => {
   const _process = childProcess.spawn(
     'docker',
     ['run', '--rm', '-e', `POSTGRES_USER=${user}`, '-p', '5432:5432', 'postgres:12-alpine'],
@@ -36,6 +36,7 @@ const spawnPg = ({ user }) => portInUse(5432)
         stdout: stdout.join(),
         stderr: stderr.join(),
       }));
+      _process.kill();
       reject(error);
     },
     10000,
