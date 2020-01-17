@@ -39,7 +39,7 @@ const spawnApp = ({ env: { PORT: port = 8080, ...env } = process.env, path }) =>
         stdout: stdout.join(),
         stderr: stderr.join(),
       }));
-      _process.kill();
+      _process.exit();
       reject(error);
     },
     1000,
