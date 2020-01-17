@@ -2,7 +2,7 @@ import childProcess from 'child_process';
 
 import portInUse from './portInUse';
 
-const spawnApp = ({ env = process.env, port, path }) => portInUse(port)
+const spawnApp = ({ env: { PORT: port = 8080, ...env } = process.env, path }) => portInUse(port)
 .then(portIsInUse => {
   if (portIsInUse) throw Error(`Port ${port} already in use`);
 })
