@@ -12,7 +12,7 @@ const spawnApp = ({ env: { PORT: port = 8080, ...env } = process.env, path }) =>
     [path],
     {
       detached: true,
-      env,
+      env: { PORT: port, ...env },
     },
   );
   const stdout = [];

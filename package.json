@@ -1,12 +1,12 @@
 {
   "name": "spawn-app",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "build": "mkdir -p build ; babel src/ -d build",
     "package": "mkdir -p package ; tar czvf package/spawn-app.tgz --transform 's/^/package\\//' package.json -C build .",
-    "deploy": "aws s3 cp package/spawn-app.tgz s3://npm.arctair.com/spawn-app-1.1.3.tgz"
+    "deploy": "aws s3 cp package/spawn-app.tgz s3://npm.arctair.com/spawn-app-1.1.4.tgz"
   },
   "dependencies": {
     "@babel/cli": "^7.7.7",
