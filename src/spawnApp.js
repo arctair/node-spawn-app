@@ -2,11 +2,12 @@ import childProcess from 'child_process';
 
 import portInUse from './portInUse';
 
-const spawnApp = ({ env: { PORT: port = 8080, ...env } = process.env, path }) => portInUse(port)
+const spawnApp = ({ timeout = 1000, env: { PORT: port = 8080, ...env } = process.env, path }) => portInUse(port)
 .then(portIsInUse => {
   if (portIsInUse) throw Error(`Port ${port} already in use`);
 })
 .then(() => new Promise((resolve, reject) => {
+  let shouldKillSelf = false;
   const _process = childProcess.spawn(
     'babel-node',
     [path],
@@ -17,7 +18,10 @@ const spawnApp = ({ env: { PORT: port = 8080, ...env } = process.env, path }) =>
   );
   const stdout = [];
   _process.stdout.setEncoding('utf8');
-  _process.stdout.on('data', data => stdout.push(data));
+  _process.stdout.on('data', data => {
+    stdout.push(data);
+    if (shouldKillSelf) _process.kill('SIGINT');
+  });
   const stderr = [];
   _process.stderr.setEncoding('utf8');
   _process.stderr.on('data', data => stderr.push(data));
@@ -35,14 +39,15 @@ const spawnApp = ({ env: { PORT: port = 8080, ...env } = process.env, path }) =>
     () => {
       clearInterval(interval);
       const error = new Error(JSON.stringify({
-        message: 'Failed to launch babel-node in 1 second',
+        message: `Failed to launch babel-node in ${timeout} ms`,
         stdout: stdout.join(),
         stderr: stderr.join(),
       }));
-      _process.exit();
+      shouldKillSelf = true;
+      _process.kill('SIGINT');
       reject(error);
     },
-    1000,
+    timeout,
   );
   const interval = setInterval(
     async () => {
