@@ -2,7 +2,7 @@ import childProcess from 'child_process';
 
 import portInUse from './portInUse';
 
-const spawnApp = ({ timeout = 1000, env: { PORT: port = 8080, ...env } = process.env, path }) => portInUse(port)
+const spawnApp = ({ timeoutMs = 1000, env: { PORT: port = 8080, ...env } = process.env, path }) => portInUse(port)
 .then(portIsInUse => {
   if (portIsInUse) throw Error(`Port ${port} already in use`);
 })
@@ -39,7 +39,7 @@ const spawnApp = ({ timeout = 1000, env: { PORT: port = 8080, ...env } = process
     () => {
       clearInterval(interval);
       const error = new Error(JSON.stringify({
-        message: `Failed to launch babel-node in ${timeout} ms`,
+        message: `Failed to launch babel-node in ${timeoutMs} ms`,
         stdout: stdout.join(),
         stderr: stderr.join(),
       }));
@@ -47,7 +47,7 @@ const spawnApp = ({ timeout = 1000, env: { PORT: port = 8080, ...env } = process
       _process.kill('SIGINT');
       reject(error);
     },
-    timeout,
+    timeoutMs,
   );
   const interval = setInterval(
     async () => {
