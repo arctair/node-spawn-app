@@ -37,7 +37,7 @@ const spawnApp = ({ timeoutMs = 1000, env: { PORT: port = 8080, ...env } = proce
     () => {
       clearInterval(interval);
       _process.kill('SIGINT');
-      killInterval = setInterval(
+      const killInterval = setInterval(
         () => {
           if (hasExited) clearInterval(killInterval);
           else _process.kill('SIGINT');
