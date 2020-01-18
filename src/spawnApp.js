@@ -24,14 +24,15 @@ const spawnApp = ({ timeoutMs = 1000, env: { PORT: port = 8080, ...env } = proce
   _process.stderr.on('data', data => stderr.push(data));
   _process.on('exit', code => {
     hasExited = true;
-    if (code !== 0) {
-      const error = new Error(JSON.stringify({
-        message: `Failed to launch babel-node: exit code ${code}`,
-        stdout: stdout.join(),
-        stderr: stderr.join(),
-      }));
-      reject(error);
-    };
+    if (code !== 0) reject(
+      new Error(
+        JSON.stringify({
+          message: `Failed to launch babel-node: exit code ${code}`,
+          stdout: stdout.join(),
+          stderr: stderr.join(),
+        })
+      )
+    );
   });
   const timeout = setTimeout(
     () => {
