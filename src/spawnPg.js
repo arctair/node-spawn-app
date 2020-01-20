@@ -18,7 +18,13 @@ const spawnPg = ({ user }) => portInUse(5432)
   _process.stdout.on('data', data => stdout.push(data));
   const stderr = [];
   _process.stderr.setEncoding('utf8');
-  _process.stderr.on('data', data => stderr.push(data));
+  _process.stderr.on('data', data => {
+    stderr.push(data);
+    if (data.indexOf('[1] LOG:  database system is ready to accept connections') > -1) {
+      clearTimeout(timeout);
+      resolve(_process);
+    }
+  });
   _process.on('exit', code => {
     if (code !== 0) reject(
       new Error(
@@ -32,7 +38,6 @@ const spawnPg = ({ user }) => portInUse(5432)
   });
   const timeout = setTimeout(
     () => {
-      clearInterval(interval);
       murder(_process);
       reject(
         new Error(
@@ -45,16 +50,6 @@ const spawnPg = ({ user }) => portInUse(5432)
       );
     },
     10000,
-  );
-  const interval = setInterval(
-    async () => {
-      if (stdout.join().indexOf('database system is ready to accept connections') > -1) {
-        clearInterval(interval);
-        clearTimeout(timeout);
-        resolve(_process);
-      }
-    },
-    10,
   );
 }));
 
