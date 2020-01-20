@@ -1,5 +1,6 @@
 import childProcess from 'child_process';
 
+import murder from './murder';
 import portInUse from './portInUse';
 
 const spawnApp = ({ timeoutMs = 1000, env: { PORT: port = 8080, ...env } = process.env, path }) => portInUse(port)
@@ -7,7 +8,6 @@ const spawnApp = ({ timeoutMs = 1000, env: { PORT: port = 8080, ...env } = proce
   if (portIsInUse) throw Error(`Port ${port} already in use`);
 })
 .then(() => new Promise((resolve, reject) => {
-  let hasExited = false;
   const _process = childProcess.spawn(
     'babel-node',
     [path],
@@ -23,7 +23,6 @@ const spawnApp = ({ timeoutMs = 1000, env: { PORT: port = 8080, ...env } = proce
   _process.stderr.setEncoding('utf8');
   _process.stderr.on('data', data => stderr.push(data));
   _process.on('exit', code => {
-    hasExited = true;
     if (code !== 0) reject(
       new Error(
         JSON.stringify({
@@ -37,14 +36,7 @@ const spawnApp = ({ timeoutMs = 1000, env: { PORT: port = 8080, ...env } = proce
   const timeout = setTimeout(
     () => {
       clearInterval(interval);
-      _process.kill('SIGINT');
-      const killInterval = setInterval(
-        () => {
-          if (hasExited) clearInterval(killInterval);
-          else _process.kill('SIGINT');
-        },
-        1000,
-      );
+      murder(_process);
       reject(
         new Error(
           JSON.stringify({

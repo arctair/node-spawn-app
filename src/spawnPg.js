@@ -1,5 +1,6 @@
 import childProcess from 'child_process';
 
+import murder from './murder';
 import portInUse from './portInUse';
 
 const spawnPg = ({ user }) => portInUse(5432)
@@ -7,7 +8,6 @@ const spawnPg = ({ user }) => portInUse(5432)
   if (portIsInUse) throw Error('Port 5432 already in use');
 })
 .then(() => new Promise((resolve, reject) => {
-  let hasExited = false;
   const _process = childProcess.spawn(
     'docker',
     ['run', '--rm', '-e', `POSTGRES_USER=${user}`, '-p', '5432:5432', 'postgres:12-alpine'],
@@ -20,7 +20,6 @@ const spawnPg = ({ user }) => portInUse(5432)
   _process.stderr.setEncoding('utf8');
   _process.stderr.on('data', data => stderr.push(data));
   _process.on('exit', code => {
-    hasExited = true;
     if (code !== 0) reject(
       new Error(
         JSON.stringify({
@@ -34,14 +33,7 @@ const spawnPg = ({ user }) => portInUse(5432)
   const timeout = setTimeout(
     () => {
       clearInterval(interval);
-      _process.kill('SIGINT');
-      const killInterval = setInterval(
-        () => {
-          if (hasExited) clearInterval(killInterval);
-          else _process.kill('SIGINT');
-        },
-        1000,
-      );
+      murder(_process);
       reject(
         new Error(
           JSON.stringify({
